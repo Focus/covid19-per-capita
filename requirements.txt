@@ -1,0 +1,4 @@
+countryinfo
+pandas
+dash
+plotly
