@@ -2,3 +2,4 @@ countryinfo
 pandas
 dash
 plotly
+gunicorn
