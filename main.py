@@ -13,8 +13,7 @@ BASE_DIR = os.path.dirname(__file__)
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
-with open(os.path.join(BASE_DIR, 'index.html'), 'r') as fh:
-    app.index_string = fh.read()
+server = app.server
 
 def load_data():
     csv_file = ('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master'
