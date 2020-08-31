@@ -10,10 +10,7 @@ import pandas as pd
 DEFAULT_COUNTRIES = ['United Kingdom', 'Turkey']
 BASE_DIR = os.path.dirname(__file__)
 
-external_stylesheets = ['./style.css']
-
 app = dash.Dash(__name__, 
-    external_stylesheets=external_stylesheets,
     meta_tags=[
         {
             'name': 'viewport',
