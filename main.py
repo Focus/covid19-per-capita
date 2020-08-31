@@ -10,16 +10,23 @@ import pandas as pd
 DEFAULT_COUNTRIES = ['United Kingdom', 'Turkey']
 BASE_DIR = os.path.dirname(__file__)
 
-external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+external_stylesheets = ['./style.css']
 
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+app = dash.Dash(__name__, 
+    external_stylesheets=external_stylesheets,
+    meta_tags=[
+        {
+            'name': 'viewport',
+            'content': 'width=device-width, initial-scale=1.0'
+        }
+    ],
+)
 server = app.server
 
 def load_data():
     csv_file = ('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master'
             '/csse_covid_19_data/csse_covid_19_time_series/time_series_'
             'covid19_confirmed_global.csv')
-
     df = pd.read_csv(csv_file)
     df.drop(['Province/State', 'Lat', 'Long'], axis=1, inplace=True)
     df = df.melt(id_vars=['Country/Region'],
@@ -60,14 +67,21 @@ def plot_frame(df, rolling_window=14, countries=None):
     else:
         frame['rolled'] = frame['new_cases_per_mil']
     fig = px.line(frame,
-                  x='date',
-                  y='rolled',
-                  color='country',
-                  category_orders={'country': countries})
+        x='date',
+        y='rolled',
+        color='country',
+        category_orders={'country': countries},)
     fig.update_layout(
         title=f'{rolling_window}-day moving average of new COVID19 cases per million',
         xaxis_title='',
-        yaxis_title=f'{rolling_window}-day moving average of new cases per million'
+        yaxis_title='',
+        legend=dict(
+            orientation="h",
+        ),
+        margin = dict(
+            r=0,
+            l=0,
+        )
     )
     return fig
 
