@@ -117,7 +117,12 @@ app.layout = html.Div(children=[
             max=30,
             step=1,
             value=14,
-        ),
+            marks={
+                0: {'label': 'No averaging'},
+                7: {'label': '7'},
+                14: {'label': '14'},
+                28: {'label': '28'},
+            }),
         ]
     ),
 
