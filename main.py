@@ -4,7 +4,7 @@ import numpy as np
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
-import plotly.express as px
+import plotly.graph_objects as go
 import pandas as pd
 
 DEFAULT_COUNTRIES = ['United Kingdom', 'Turkey']
@@ -63,11 +63,16 @@ def plot_frame(df, rolling_window=14, countries=None):
         )
     else:
         frame['rolled'] = frame['new_cases_per_mil']
-    fig = px.line(frame,
-        x='date',
-        y='rolled',
-        color='country',
-        category_orders={'country': countries},)
+
+    fig = go.Figure()
+    for country in countries:
+        country_frame = frame[frame['country'] == country]
+        fig.add_trace(go.Line(
+            x=country_frame['date'],
+            y=country_frame['rolled'],
+            name=country
+        ))
+
     fig.update_layout(
         title=f'{rolling_window}-day moving average of new COVID19 cases per million',
         xaxis_title='',
@@ -135,7 +140,7 @@ app.layout = html.Div(children=[
 )
 def update_output(countries, window):
     return (plot_frame(df,
-                       countries=countries[::-1],
+                       countries=countries,
                        rolling_window=window),
             f'Rolling window: {window}')
 
