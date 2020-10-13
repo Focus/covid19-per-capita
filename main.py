@@ -10,7 +10,8 @@ import pandas as pd
 DEFAULT_COUNTRIES = ['United Kingdom', 'Turkey']
 BASE_DIR = os.path.dirname(__file__)
 
-app = dash.Dash(__name__, 
+app = dash.Dash(
+    __name__,
     meta_tags=[
         {
             'name': 'viewport',
@@ -20,10 +21,13 @@ app = dash.Dash(__name__,
 )
 server = app.server
 
+
 def load_data():
-    csv_file = ('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master'
-            '/csse_covid_19_data/csse_covid_19_time_series/time_series_'
-            'covid19_confirmed_global.csv')
+    csv_file = (
+        'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master'
+        '/csse_covid_19_data/csse_covid_19_time_series/time_series_'
+        'covid19_confirmed_global.csv'
+    )
     df = pd.read_csv(csv_file)
     df.drop(['Province/State', 'Lat', 'Long'], axis=1, inplace=True)
     df = df.melt(id_vars=['Country/Region'],
@@ -35,7 +39,9 @@ def load_data():
     df = df.groupby(['country', 'date']).sum().reset_index()
     df.sort_values(['date', 'country'], inplace=True)
 
-    df['new_cases'] = df.groupby('country')['infected'].transform(lambda x: x - x.shift(1))
+    df['new_cases'] = df.groupby('country')['infected'].transform(
+        lambda x: x - x.shift(1)
+    )
     df['new_cases_per_mil'] = np.nan
     no_info_countries = []
     for country, frame in df.groupby('country'):
@@ -43,7 +49,8 @@ def load_data():
             country_info = CountryInfo(country)
             population = country_info.population()
             mask = df['country'] == country
-            df.loc[mask, 'new_cases_per_mil'] = 1e6 * df['new_cases'] / population
+            df.loc[mask, 'new_cases_per_mil'] = 1e6 * df.loc[mask, 'new_cases']
+            df.loc[mask, 'new_cases_per_mil'] /= population
         except KeyError:
             no_info_countries.append(country)
             pass
@@ -58,9 +65,10 @@ def plot_frame(df, rolling_window=14, countries=None):
         return {}
     frame = df[df['country'].isin(countries)].copy()
     if rolling_window > 0:
-        frame['rolled'] = frame.groupby('country')['new_cases_per_mil'].transform(
-            lambda x: x.rolling(rolling_window).mean()
-        )
+        frame['rolled'] = frame.groupby('country')['new_cases_per_mil']\
+            .transform(
+                lambda x: x.rolling(rolling_window).mean()
+            )
     else:
         frame['rolled'] = frame['new_cases_per_mil']
 
@@ -111,27 +119,27 @@ app.layout = html.Div(children=[
         children=[
             html.Div(children='Rolling window: 14',
                      id='rolling-label'),
-        dcc.Slider(
-            id='rolling-window',
-            min=0,
-            max=30,
-            step=1,
-            value=14,
-            marks={
-                0: {'label': 'No averaging'},
-                7: {'label': '7'},
-                14: {'label': '14'},
-                28: {'label': '28'},
-            }),
+            dcc.Slider(
+                id='rolling-window',
+                min=0,
+                max=30,
+                step=1,
+                value=14,
+                marks={
+                    0: {'label': 'No averaging'},
+                    7: {'label': '7'},
+                    14: {'label': '14'},
+                    28: {'label': '28'},
+                }),
         ]
     ),
 
-    html.Div(children='''
-    Data source: 
-    https://github.com/CSSEGISandData/COVID-19
-    '''),
+    html.Div(children="""
+    Data source: https://github.com/CSSEGISandData/COVID-19
+    """)
 
 ])
+
 
 @app.callback(
     [
