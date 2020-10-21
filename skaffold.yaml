@@ -6,7 +6,7 @@ build:
   artifacts:
   - image: rg.nl-ams.scw.cloud/njkonl/covid19-per-capita
     kaniko:
-      cache: true
+      cache: {}
 deploy:
   kubectl:
     manifests:
