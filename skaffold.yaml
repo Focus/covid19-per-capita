@@ -9,7 +9,7 @@ build:
       cache: {}
   cluster:
     dockerConfig:
-      secretName: kaniko-docker-creds
+      secretName: regcred
     namespace: g8s
 deploy:
   kubectl:
