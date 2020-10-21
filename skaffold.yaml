@@ -10,6 +10,7 @@ build:
   cluster:
     dockerConfig:
       secretName: kaniko-docker-creds
+    namespace: g8s
 deploy:
   kubectl:
     manifests:
