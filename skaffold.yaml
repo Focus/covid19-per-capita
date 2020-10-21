@@ -5,6 +5,8 @@ metadata:
 build:
   artifacts:
   - image: rg.nl-ams.scw.cloud/njkonl/covid19-per-capita
+    kaniko:
+      cache: true
 deploy:
   kubectl:
     manifests:
