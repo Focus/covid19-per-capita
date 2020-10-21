@@ -1,6 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  namespace: g8s
   name: cv19pc
 spec:
   selector:

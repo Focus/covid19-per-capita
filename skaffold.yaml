@@ -2,6 +2,7 @@ apiVersion: skaffold/v2beta8
 kind: Config
 metadata:
   name: covid--per-capita
+  namespace: g8s
 build:
   artifacts:
   - image: rg.nl-ams.scw.cloud/njkonl/covid19-per-capita
@@ -9,7 +10,7 @@ build:
       cache: {}
   cluster:
     dockerConfig:
-      secretName: regcred
+      secretName: kaniko-docker-creds
 deploy:
   kubectl:
     manifests:
