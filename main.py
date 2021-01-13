@@ -6,9 +6,15 @@ import dash_core_components as dcc
 import dash_html_components as html
 import plotly.graph_objects as go
 import pandas as pd
+from datetime import datetime, timezone
 
+LAST_DATA_PULL = datetime.now(timezone.utc)
+REFRESH_EVERY_SECONDS = 60 * 60 * 4  # 4 hours
 DEFAULT_COUNTRIES = ['United Kingdom', 'Turkey']
 BASE_DIR = os.path.dirname(__file__)
+EXCLUSIONS = [
+    ('Turkey', '2020-12-10', '2020-12-10')
+]
 
 app = dash.Dash(
     __name__,
@@ -20,6 +26,16 @@ app = dash.Dash(
     ],
 )
 server = app.server
+
+
+def apply_exclusions(df):
+    exclude = pd.Series(False, index=df.index)
+    for country, start, end in EXCLUSIONS:
+        exclude |= (df['country'] == country) & \
+            (df['date'] >= start) & \
+            (df['date'] <= end)
+    df.loc[exclude, 'new_cases'] = np.nan
+    return df
 
 
 def load_data():
@@ -42,6 +58,9 @@ def load_data():
     df['new_cases'] = df.groupby('country')['infected'].transform(
         lambda x: x - x.shift(1)
     )
+
+    df = apply_exclusions(df)
+
     df['new_cases_per_mil'] = np.nan
     no_info_countries = []
     for country, frame in df.groupby('country'):
@@ -67,7 +86,7 @@ def plot_frame(df, rolling_window=14, countries=None):
     if rolling_window > 0:
         frame['rolled'] = frame.groupby('country')['new_cases_per_mil']\
             .transform(
-                lambda x: x.rolling(rolling_window).mean()
+                lambda x: x.dropna().rolling(rolling_window).mean().reindex(x.index)
             )
     else:
         frame['rolled'] = frame['new_cases_per_mil']
@@ -88,7 +107,7 @@ def plot_frame(df, rolling_window=14, countries=None):
         legend=dict(
             orientation="h",
         ),
-        margin = dict(
+        margin=dict(
             r=0,
             l=0,
         )
@@ -152,6 +171,12 @@ app.layout = html.Div(children=[
     ]
 )
 def update_output(countries, window):
+    global df
+    global LAST_DATA_PULL
+    now = datetime.now(timezone.utc)
+    if (now - LAST_DATA_PULL).seconds > REFRESH_EVERY_SECONDS:
+        df = load_data()
+        LAST_DATA_PULL = now
     return (plot_frame(df,
                        countries=countries,
                        rolling_window=window),
